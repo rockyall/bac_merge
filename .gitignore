@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+assets/EstadoCuenta.txt
+assets/Transacciones del mes 2020.csv
+assets/Transacciones del mes.csv
+.vscode/launch.json
