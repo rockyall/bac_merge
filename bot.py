@@ -29,10 +29,6 @@ pathLin = r"/opt/WebDriver/bin/chromedriver"
 driver = Chrome(executable_path=pathWin, options=_options)
 
 
-def convert_date(timestamp):
-    date = datetime.utcfromtimestamp(timestamp)
-
-
 def save_data_sqlserver(server_name, db, csvpath, username, password):
     try:
         SqlServer = db_server()
@@ -42,7 +38,7 @@ def save_data_sqlserver(server_name, db, csvpath, username, password):
         profile_id = Bac.merge_transaction_profile()
         Bac.merge_transaction(profile_id)
 
-        # Finnally we copy the file to our assets, for backups propuses    
+        # Finnally we copy the file to our assets, for backups propuses
         location_csvPath2 = f"/assets/{csvpath}"
         if(os.path.exists(csvpath)):
             if(os.path.exists(location_csvPath2)):
@@ -65,6 +61,7 @@ def find_and_download_transactions():
     try:
         # Open new windows to search the account balance
         url_link = "https://www1.sucursalelectronica.com/ebac/module/accountbalance/accountBalance.go"
+        # url_link = "https://www6.sucursalelectronica.com/ebac/module/accountbalance/accountBalance.go"
         driver.execute_script("window.open();")
 
         windows_list = driver.window_handles
@@ -133,33 +130,31 @@ def calendar_detection_selection():
         print(f"\n\n\n{ex}")
 
 
-def get_dollar_exchange():
+def get_dollar_exchange(dbs, servers):
     try:
         pass
         # Elementes that we are gonna need for the selenium bot
-            # Frame exchange id: money-converter
-            # Select tag exchange id: countryDropDownList
-            # Select option tag exchange values child: Honduras, value: HN
-            # Compra id ezchange: exchangeRateBuyUSD
-            # Venta id exchange: exchangeRateSellUSD
+        # Frame exchange id: money-converter
+        # Select tag exchange id: countryDropDownList
+        # Select option tag exchange values child: Honduras, value: HN
+        # Compra id ezchange: exchangeRateBuyUSD
+        # Venta id exchange: exchangeRateSellUSD
         tablename = "exchanges"
         datatable = ""
-        data= []
+        data = []
         headers_fields = []
 
         el_frame = "money-converter"
         el_selection = "countryDropDownList"
-        el_selection_name = "Honduras"
-        el_selection_value_option = "HN"
         el_selection_value_option_xpath = "//*[@id='countryDropDownList']/option[6]"
         el_RateBuy = "exchangeRateBuyUSD"
         el_RateSell = "exchangeRateSellUSD"
-        
+
         se_buy = driver.find_element_by_id(el_RateBuy)
         se_sell = driver.find_element_by_id(el_RateSell)
-        se_frame = driver.find_element_by_id(el_frame)
         se_selection = driver.find_element_by_id(el_selection)
-        se_option_selection = driver.find_element_by_xpath(el_selection_value_option_xpath)
+        se_option_selection = driver.find_element_by_xpath(
+            el_selection_value_option_xpath)
 
         se_selection.click()
         se_option_selection.click()
@@ -169,56 +164,42 @@ def get_dollar_exchange():
 
         formated_date = datetime.now().date()
         headers_fields = ["CurrencyBase", "Sell", "Buy", "Date", "BankId"]
-        
+
         data = [
             ["USD", sell_text, buy_text, str(formated_date), 1]
         ]
-        
-        databases = [
-            {
-                "ServerName" :"",
-                "User": "",
-                "Password": ""
-            },
-            {
-                "ServerName": "",
-                "User": "",
-                "Password": ""
-            },
-            {
-                "ServerName": "",
-                "User": "",
-                "Password": ""
-            }
-        ]
 
+        for server in servers:
+            for db in dbs:
+                try:
+                    database = db
+                    SqlServer = db_server()
+                    SqlServer.get_mysql_connection(
+                        server["ServerName"], db["Name"], server["User"], server["Password"])
 
+                    original_teble_name = SqlServer.get_original_table_name(
+                        tablename)
 
-        for item in databases:
-            try:
-                SqlServer = db_server()
-                SqlServer.get_mysql_connection(item["ServerName"], "db_finance", item["User"], item["Password"])
+                    query = f"SELECT Date from {original_teble_name} order by Date DESC Limit 1;"
+                    last_transaction = SqlServer.get_data_query(query)
+                    if(last_transaction == 0):
+                        SqlServer.insert_rows(tablename, headers_fields, data)
+                        continue
 
-                original_teble_name = SqlServer.get_original_table_name(tablename)
-                
-                query = f"SELECT Date from {original_teble_name} order by Date DESC Limit 1;"
-                last_transaction = SqlServer.get_data_query(query)
-                if(last_transaction == 0):
+                    db_formated_date = datetime(
+                        last_transaction[0].year, last_transaction[0].month, last_transaction[0].day)
+                    new_formated_date = datetime(
+                        formated_date.year, formated_date.month, formated_date.day)
+
+                    if(db_formated_date == new_formated_date):
+                        continue
+
                     SqlServer.insert_rows(tablename, headers_fields, data)
-                    continue
-                
-                db_formated_date = datetime(last_transaction[0].year, last_transaction[0].month, last_transaction[0].day)
-                new_formated_date = datetime(formated_date.year, formated_date.month, formated_date.day)
+                    SqlServer.close_connection()
 
-                if(db_formated_date == new_formated_date):
-                    continue
-
-                SqlServer.insert_rows(tablename, headers_fields, data)
-                SqlServer.close_connection()
-            
-            except Exception as ex:
-                print("Some proble with the database")
-                print(ex)
+                except Exception as ex:
+                    print("Some proble with the database")
+                    print(ex)
 
     except Exception as ex:
         print(ex)
@@ -227,17 +208,16 @@ def get_dollar_exchange():
         print("method executed get_dollar_exchange \n")
 
 
-def Init(credentailsPath, csvpath):
+def Init(credentailsPath, csvpath, dbs, servers):
     try:
         el_usernameID = "productId"
         el_passwordID = "pass"
         bt_SubmitFormID = "confirm"
 
-
         # 1 Verify there is no file named Transacciones del mes.csv
         os.system('cls')
         time.sleep(1)
-        print("Spider bot initiated...\n\n");
+        print("Spider bot initiated...\n\n")
 
         if os.path.exists(csvpath):
             os.remove(csvpath)
@@ -250,7 +230,7 @@ def Init(credentailsPath, csvpath):
 
         # 3 Start to navegate in the browser
         driver.get("https://www1.sucursalelectronica.com/redir/showLogin.go")
-        get_dollar_exchange()
+        get_dollar_exchange(dbs, servers)
         se_username = driver.find_element_by_id(el_usernameID)
         se_password = driver.find_element_by_id(el_passwordID)
         se_submit = driver.find_element_by_id(bt_SubmitFormID)
@@ -258,7 +238,7 @@ def Init(credentailsPath, csvpath):
         se_password.send_keys(password)
         se_submit.click()
 
-        print("\nFuck warnings ...\n");
+        print("\nFuck warnings ...\n")
         el_sessions_page = []
         el_sessions_page = driver.find_elements_by_class_name(
             "principalTitles")
@@ -268,42 +248,49 @@ def Init(credentailsPath, csvpath):
                 el_buttons[0].click()
 
         find_and_download_transactions()
-        print("Spider bot has complete...\n\n");
+        print("Spider bot has complete...\n\n")
 
     except Exception as ex:
         print(ex)
 
 
 if __name__ == "__main__":
-    DB = "db_finance"
-    csvPath = "Transacciones del mes.csv"
 
-    databases = [
+    csvPath = "Transacciones del mes.csv"
+    dbs = [
         {
-            "ServerName" :"",
-            "User": "",
-            "Password": ""
+            "Name": ""
         },
         {
-            "ServerName": "",
-            "User": "",
-            "Password": ""
-        },
-        {
-            "ServerName": "",
-            "User": "",
-            "Password": ""
+            "Name": ""
         }
     ]
-    
+
+    server_db = [
+        {
+            "ServerName": "",
+            "User": "",
+            "Password": ""
+        },
+        {
+            "ServerName": "",
+            "User": "",
+            "Password": ""
+        },
+    ]
+
     os.system('clear')
-    Init("cred.txt", csvPath)
-    
-    print("Saving the data ....\n\n")
-    for item in range(len(databases)):
-        print(f"\n Proccesing the data for the database {databases[item]}\n{('--'  * 50)}")
-        save_data_sqlserver(databases[item]["ServerName"], DB, csvPath, databases[item]["User"], databases[item]["Password"])
-    
+    Init("cred.txt", csvPath, dbs, server_db)
+
+    print("Saving the data....\n\n")
+    for itemx in range(len(server_db)):
+        print(
+            f"\nProccesing the data for the server: {server_db[itemx]}\n{('--'  * 50)}")
+        for db in dbs:
+            database = db
+            save_data_sqlserver(server_db[itemx]["ServerName"], db["Name"],
+                                csvPath, server_db[itemx]["User"], server_db[itemx]["Password"])
+
     os.remove(csvPath)
     driver.close()
     exit(0)

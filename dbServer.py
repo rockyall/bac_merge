@@ -51,17 +51,18 @@ class db_server:
             for item in data:
                 print(f"\n\nInserting items: {item}")
                 print(f"Table name: {original_teble_name}")
-                time.sleep(0.1)
-                
+
                 caractertArray = []
                 for itemy in range(len(item)):
                     caractertArray.append("%s")
 
-                print(f"This is the orginal table name for this inserrtion: {original_teble_name}");
+                print(
+                    f"This is the orginal table name for this inserrtion: {original_teble_name}")
                 print(rows_fields)
                 print(item)
 
-                query = "insert into {0} ({1}) values ({2});".format(original_teble_name, rows_fields, ','.join(caractertArray))
+                query = "insert into {0} ({1}) values ({2});".format(
+                    original_teble_name, rows_fields, ','.join(caractertArray))
                 self.cursor.execute(query, item)
                 self.connection.commit()
                 print(f"Inserted good...")
@@ -72,10 +73,10 @@ class db_server:
     def update_rows_id(self, identifier, table_name, arr_Headers=[], arr_Data=[]):
         try:
             # Query example: UPDATE table_name SET field1 = new-value1, field2 = new-value2 [WHERE Clause]
-            
-            # item = ["value1","value2","value3","value4","value5","value6",] 
+
+            # item = ["value1","value2","value3","value4","value5","value6",]
             # arr_Headers = ["header1", "header2", "header3"]
-            
+
             headers = ','.join(arr_Headers)
             original_teble_name = self.get_original_table_name(table_name)
 
@@ -85,7 +86,8 @@ class db_server:
                 for itemy in range(len(item)):
                     caractertArray.append("%s")
 
-                print(f"This is the orginal table name for this inserrtion: {original_teble_name}");
+                print(
+                    f"This is the orginal table name for this inserrtion: {original_teble_name}")
                 print(headers)
                 print(item)
 
@@ -96,13 +98,13 @@ class db_server:
                     row = f"{arr_Headers[itemY]}={arr_Data[0][itemY]}"
                     header_value_concat.append(row)
 
-                query = "update {0} SET {1} where Id = {2};".format(original_teble_name, ','.join(header_value_concat), identifier)
+                query = "update {0} SET {1} where Id = {2};".format(
+                    original_teble_name, ','.join(header_value_concat), identifier)
                 self.cursor.execute(query)
                 self.connection.commit()
                 print(f"Inserted good...")
         except Exception as ex:
             pritn(ex)
-
 
     def get_rows_table(self, table):
         original_teble_name = self.get_original_table_name(table)
