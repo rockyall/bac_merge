@@ -1,0 +1,31 @@
+Número de Clientes, Nombre, Producto, Moneda, Saldo Inicial, Saldo en Libros, Retenidos y Diferidos, Saldo Disponible, Fecha, STBGAV, STBUNC, Mensaje1, Mensaje2, Mensaje3, Mensaje4, Mensaje5, Mensaje6 
+997117, RICARDO ALL OCHOA HERNANDEZ, 740035741, LPS, 5433.85, 0.92, 0.00, 0.92, 30/09/2021, 2100.71, 0.00, , , , , ,  
+
+Detalle de Estado Bancario
+Fecha de Transacción, Referencia de Transacción, Código de Transacción, Descripción de Transacción, Débito de Transacción, Crédito de Transacción, Balance de Transacción 
+21/09/2021, 92000000, CP, SPORTLINE AMERICA LAS\ Te     , 2133.45, 0.00, 3300.40 
+21/09/2021, 92000000, CP, SUPERMERCADOS LA COLON\Te     , 1224.76, 0.00, 2075.64 
+21/09/2021, 92000000, CP, MINISO\                TEGUCIG, 247.39, 0.00, 1828.25 
+23/09/2021, 900452582, MD, ACH PRONTO  150000210040112870, 250.00, 0.00, 1578.25 
+23/09/2021, 900452582, 59, COMISION ACH PRONTO  150000210, 35.00, 0.00, 1543.25 
+27/09/2021, 412806392, TF, TEF A : 726843901             , 750.00, 0.00, 793.25 
+28/09/2021, 92600248, CP, IMAGEN                        , 230.00, 0.00, 563.25 
+28/09/2021, 92600248, CP, ESPRESSO AMER MULTIPLAZA CAFE , 40.00, 0.00, 523.25 
+29/09/2021, 92800000, CP, MI TIGO RECARGAS\      FRANCIS, 25.00, 0.00, 498.25 
+29/09/2021, 110500237, AT, RETIRO ATM 642438             , 100.00, 0.00, 398.25 
+29/09/2021, 110500263, AT, RETIRO ATM 642438             , 300.00, 0.00, 98.25 
+30/09/2021, 93061581, 3O, INTERESES                     , 0.00, 0.17, 98.42 
+01/10/2021, 93007, HT, HRE PLUS BASICO               , 41.22, 0.00, 57.20 
+02/10/2021, 712100149, PE, PAGO PLANILLA TEGA            , 0.00, 5000.00, 5057.20 
+
+Resumen de Estado Bancario
+Código Transacción Totales , Cantidad Débitos Totales, Montos Débitos Totales, Cantidad Créditos Totales, Montos Créditos Totales 
+CP, 6, 3900.60, 0, 0.00 
+MD, 1, 250.00, 0, 0.00 
+59, 1, 35.00, 0, 0.00 
+TF, 1, 750.00, 0, 0.00 
+AT, 2, 400.00, 0, 0.00 
+3O, 0, 0.00, 1, 0.17 
+HT, 1, 41.22, 0, 0.00 
+PE, 0, 0.00, 1, 5000.00 
+Total, 12, 5376.82, 2, 5000.17 

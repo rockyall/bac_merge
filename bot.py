@@ -6,7 +6,7 @@ import urllib
 import urllib3
 import time
 import pyodbc
-from datetime import datetime
+from datetime import date, datetime
 from dbServer import db_server
 from bac import bac_credomatic
 
@@ -19,6 +19,7 @@ download_path = os.path.dirname(os.path.abspath(__file__))
 download_config = {
     'download.default_directory': download_path
 }
+
 
 _options = Options()
 _options.page_load_strategy = 'eager'
@@ -69,7 +70,9 @@ def find_and_download_transactions():
         driver.get(url_link)
 
         # This function will detect and set the date from we want to download the data.
-        calendar_detection_selection()
+        # fromDate = get_last_transaction_date()
+        # select_calendar_date(fromDate, datetime.now())
+        select_calendar_date()
 
         down_name = "download"
         bt_queryID = "normalQueryButton"
@@ -88,7 +91,18 @@ def find_and_download_transactions():
         print("\n\n" + ex)
 
 
-def calendar_detection_selection():
+def get_last_transaction_date():
+    SqlServer = db_server()
+    SqlServer.get_mysql_connection("localhost", "db_finance", "root", "root")
+    sqlString = "select * from transactionsdetails order by Date desc Limit 1"
+    list = SqlServer.get_data_query_list(sqlString)
+    if(list == 0):
+        return datetime.now()
+    data = list[0]
+    return data[1]  # the date time index to get the date object
+
+
+def select_calendar_date():
     try:
         calendar_id = "initDate"
         el_calendar = driver.find_element_by_id(calendar_id)
@@ -123,7 +137,51 @@ def calendar_detection_selection():
                             break
             except:
                 print("I am trying to download a file ...\n\n")
+            return
 
+    except Exception as ex:
+        print(f"\n\n\n{ex}")
+
+
+def select_calendar_date(fromDate, toDate):
+    try:
+        calendar_id = "initDate"
+        el_calendar = driver.find_element_by_id(calendar_id)
+        el_calendar.click()
+
+        # Detect the elements values
+        css_calendar = "ui-datepicker-calendar"
+        css_calendar_back = "ui-datepicker-prev"
+        css_calendar_forward = "ui-datepicker-next"
+
+        css_calendar_date_year = "ui-datepicker-year"
+        css_calendar_date_month = "ui-datepicker-month"
+        css_calendar_date_day = "ui-datepicker-day"
+
+        # loop to find the first date of the month
+        while True:
+            el_calendar_back = driver.find_element_by_class_name(
+                css_calendar_back)
+            el_calendar_back.click()
+            isDisable_back = driver.find_elements_by_css_selector(
+                f"a.{css_calendar_back}.ui-state-disabled")
+
+            if(len(isDisable_back) <= 0):
+                continue
+
+            el_calendar = driver.find_element_by_class_name(css_calendar)
+            rows = el_calendar.find_elements_by_tag_name('tr')
+
+            try:
+                for x in rows:
+                    columns = x.find_elements_by_tag_name('td')
+                    for y in columns:
+                        if y.text == '1':
+                            el_a = y.find_element_by_tag_name('a')
+                            el_a.click()
+                            break
+            except:
+                print("I am trying to download a file ...\n\n")
             return
 
     except Exception as ex:
@@ -132,7 +190,9 @@ def calendar_detection_selection():
 
 def get_dollar_exchange(dbs, servers):
     try:
-        pass
+        print("download_path")
+        print(download_path)
+
         # Elementes that we are gonna need for the selenium bot
         # Frame exchange id: money-converter
         # Select tag exchange id: countryDropDownList
@@ -229,6 +289,7 @@ def Init(credentailsPath, csvpath, dbs, servers):
         password = rows[1]
 
         # 3 Start to navegate in the browser
+        print("we are going to the bac credomatic web-site")
         driver.get("https://www1.sucursalelectronica.com/redir/showLogin.go")
         get_dollar_exchange(dbs, servers)
         se_username = driver.find_element_by_id(el_usernameID)
@@ -259,24 +320,24 @@ if __name__ == "__main__":
     csvPath = "Transacciones del mes.csv"
     dbs = [
         {
-            "Name": ""
-        },
-        {
-            "Name": ""
+            "Name": "db_finance"
         }
+        # {
+        #     "Name": "db_finance_dev"
+        # }
     ]
 
     server_db = [
         {
-            "ServerName": "",
+            "ServerName": "localhost",
             "User": "",
             "Password": ""
         },
         {
-            "ServerName": "",
+            "ServerName": "192.168.0.3",
             "User": "",
             "Password": ""
-        },
+        }
     ]
 
     os.system('clear')

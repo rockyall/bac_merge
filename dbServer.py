@@ -158,6 +158,19 @@ class db_server:
             print(ex)
             return 0
 
+    def get_data_query_list(self, str_query):
+        try:
+            query = f"""{str_query}"""
+            self.cursor.execute(query)
+            rows = self.cursor.fetchall()
+            if(len(rows) == 0):
+                return 0
+            return rows
+        except Exception as ex:
+            print("Error in get data quert function in db_server")
+            print(ex)
+            return 0
+
     # Helpers functions
     def map_tablename_with_lowercase(self):
         tables = []

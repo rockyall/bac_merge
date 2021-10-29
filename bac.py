@@ -1,7 +1,5 @@
 import os
-import pyodbc
 import datetime
-import numpy
 from dbServer import db_server
 
 
@@ -22,7 +20,7 @@ class bac_credomatic:
             # Iterate for the each transaction row
             fields = ["Date", "Reference", "Code",
                       "Description", "Debit", "Credit", "Balance", "TransactionProfileId"]
-            
+
             tempList = self.Sql.map_tablename_with_lowercase()
             original_teble_name = ""
             for itemz in range(len(tempList)):
@@ -90,20 +88,24 @@ class bac_credomatic:
                 "LastUpdated": datetime.datetime(int(columns[8].split("/")[2]), int(columns[8].split("/")[1]), int(columns[8].split("/")[0]))
             }
 
-            profileID = self.Sql.get_profile_id_by_product(tablename, profile["Product"])
+            profileID = self.Sql.get_profile_id_by_product(
+                tablename, profile["Product"])
             fields = ["Name", "Product", "Currency", "InitialRate",
-                        "BalanceInBooks", "HeldDeferred", "AvialableBalance", "LastUpdated"]
+                      "BalanceInBooks", "HeldDeferred", "AvialableBalance", "LastUpdated"]
             self.transaction_profile = [profile["Name"], profile["Product"], profile["Currency"],
                                         float(profile["InitialRate"]), float(
                                             profile["BalanceInBooks"]), float(profile["HeldDeferred"]),
                                         float(profile["AvialableBalance"]), profile["LastUpdated"].strftime("%Y-%m-%d")]
             if(profileID == 0):
-                self.Sql.insert_rows(tablename, fields, [self.transaction_profile])
-                profileID = self.Sql.get_profile_id_by_product(tablename, profile["Product"])
+                self.Sql.insert_rows(tablename, fields, [
+                                     self.transaction_profile])
+                profileID = self.Sql.get_profile_id_by_product(
+                    tablename, profile["Product"])
                 return profileID
             else:
-                #Update the the row for the existing user
-                self.Sql.update_rows_id(profileID, tablename, fields, [self.transaction_profile])
+                # Update the the row for the existing user
+                self.Sql.update_rows_id(profileID, tablename, fields, [
+                                        self.transaction_profile])
                 return profileID
 
         except Exception as ex:
@@ -139,4 +141,3 @@ class bac_credomatic:
 #         Bac.merge_transaction(profile_id)
 
 #         DBServer.close_connection()
-
