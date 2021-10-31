@@ -70,9 +70,9 @@ def find_and_download_transactions():
         driver.get(url_link)
 
         # This function will detect and set the date from we want to download the data.
-        # fromDate = get_last_transaction_date()
-        # select_calendar_date(fromDate, datetime.now())
-        select_calendar_date()
+        fromDate = get_last_transaction_date()
+        # fromDate = datetime(fromDate.year, fromDate.month, fromDate.day + 1)
+        select_calendar_date(fromDate, datetime.now())
 
         down_name = "download"
         bt_queryID = "normalQueryButton"
@@ -151,39 +151,49 @@ def select_calendar_date(fromDate, toDate):
 
         # Detect the elements values
         css_calendar = "ui-datepicker-calendar"
-        css_calendar_back = "ui-datepicker-prev"
-        css_calendar_forward = "ui-datepicker-next"
 
-        css_calendar_date_year = "ui-datepicker-year"
-        css_calendar_date_month = "ui-datepicker-month"
-        css_calendar_date_day = "ui-datepicker-day"
+        try:  # Searching for the year
+            years_select = driver.find_element_by_xpath(
+                "//*[@id='ui-datepicker-div']/div/div/select[2]")
+            years = years_select.find_elements_by_tag_name('option')
+            for year in years:
+                value = year.get_attribute('value')
+                if(int(value) == fromDate.year):
+                    year.click()
+                    break
+        except Exception as ex:
+            print(f"Error to select the year form the calendar {ex}")
 
-        # loop to find the first date of the month
-        while True:
-            el_calendar_back = driver.find_element_by_class_name(
-                css_calendar_back)
-            el_calendar_back.click()
-            isDisable_back = driver.find_elements_by_css_selector(
-                f"a.{css_calendar_back}.ui-state-disabled")
+        # Searching for the month //*[@id="ui-datepicker-div"]/div/div/select[1]
+        try:
+            mont_select = driver.find_element_by_xpath(
+                "//*[@id='ui-datepicker-div']/div/div/select[1]")
+            months = mont_select.find_elements_by_tag_name('option')
+            for month in months:
+                value = month.get_attribute('value')
+                if(int(value) + 1 == fromDate.month):
+                    month.click()
+                    break
+        except Exception as ex:
+            print(f"Error to select the month form the calendar {ex}")
 
-            if(len(isDisable_back) <= 0):
-                continue
-
+        try:  # Searching for the day
+            # loop to find the first date of the month
             el_calendar = driver.find_element_by_class_name(css_calendar)
             rows = el_calendar.find_elements_by_tag_name('tr')
-
-            try:
-                for x in rows:
-                    columns = x.find_elements_by_tag_name('td')
-                    for y in columns:
-                        if y.text == '1':
+            for x in rows:
+                columns = x.find_elements_by_tag_name('td')
+                for y in columns:
+                    try:
+                        y_string = y.text.strip()
+                        if int(y_string) == fromDate.day:
                             el_a = y.find_element_by_tag_name('a')
                             el_a.click()
                             break
-            except:
-                print("I am trying to download a file ...\n\n")
-            return
-
+                    except:
+                        pass
+        except Exception as ex:
+            print(f"Error selecting the day from the calendar {ex}")
     except Exception as ex:
         print(f"\n\n\n{ex}")
 
@@ -329,12 +339,12 @@ if __name__ == "__main__":
 
     server_db = [
         {
-            "ServerName": "localhost",
+            "ServerName": "",
             "User": "",
             "Password": ""
         },
         {
-            "ServerName": "192.168.0.3",
+            "ServerName": "",
             "User": "",
             "Password": ""
         }

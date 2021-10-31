@@ -1,7 +1,7 @@
 import time
 import os
 import datetime
-# import pyodbc
+import pyodbc
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -34,7 +34,7 @@ class db_server:
             self.connection = mysql.connector.connect(
                 user=username, password=password, host=server, database=db)
             self.cursor = self.connection.cursor()
-        except Exception as ex:
+        except Exception as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
@@ -104,7 +104,7 @@ class db_server:
                 self.connection.commit()
                 print(f"Inserted good...")
         except Exception as ex:
-            pritn(ex)
+            print(ex)
 
     def get_rows_table(self, table):
         original_teble_name = self.get_original_table_name(table)

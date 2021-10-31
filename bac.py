@@ -18,8 +18,7 @@ class bac_credomatic:
             rows = file.readlines()
 
             # Iterate for the each transaction row
-            fields = ["Date", "Reference", "Code",
-                      "Description", "Debit", "Credit", "Balance", "TransactionProfileId"]
+            fields = ["Date", "Reference", "Code", "Description", "Debit", "Credit", "Balance", "TransactionProfileId", "TimeStamp"]
 
             tempList = self.Sql.map_tablename_with_lowercase()
             original_teble_name = ""
@@ -34,10 +33,12 @@ class bac_credomatic:
             last_transaction = self.Sql.get_data_query(query2)
 
             index = 0
-            for row in rows[5:(len(rows) - 13)]:
+            for row in rows[5:(len(rows))]:
                 columns = row.split(',')
-                dateArray = columns[0].split("/")
+                if(columns.__len__() <= 1):
+                    break
 
+                dateArray = columns[0].split("/")
                 # Clean the data from white spaces
                 Reference = columns[1].strip()
                 Code = columns[2].strip()
@@ -46,10 +47,9 @@ class bac_credomatic:
                 Credit = columns[5].strip()
                 Balance = columns[6].strip()
 
-                date = datetime.datetime(int(dateArray[2]), int(
-                    dateArray[1]), int(dateArray[0]))
-                transaction_array = [date.strftime(
-                    "%Y-%m-%d"), Reference, Code, Description, float(Debit), float(Credit), float(Balance), id]
+                date = datetime.datetime(int(dateArray[2]), int(dateArray[1]), int(dateArray[0]))
+                dateNow = datetime.datetime.now()
+                transaction_array = [date.strftime("%Y-%m-%d"), Reference, Code, Description, float(Debit), float(Credit), float(Balance), id, dateNow.strftime("%Y-%m-%d %H:%M:%S")]
                 if(type(last_transaction) == int):
                     self.transaction_data.append(transaction_array)
                     continue
@@ -58,9 +58,9 @@ class bac_credomatic:
                     self.transaction_data.append(transaction_array)
 
                 index += 1
+
             if(len(self.transaction_data) > 0):
-                self.Sql.insert_rows(
-                    tablename, fields, self.transaction_data)
+                self.Sql.insert_rows(tablename, fields, self.transaction_data)
 
             file.close()
         except Exception as ex:
