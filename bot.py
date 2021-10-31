@@ -1,4 +1,5 @@
 import shutil
+import json
 import sys
 import os
 import csv
@@ -92,8 +93,13 @@ def find_and_download_transactions():
 
 
 def get_last_transaction_date():
+    file = open("server_cred.json", 'r')
+    jsonData = json.load(file)
+    jsonData = dict(jsonData)
+    file.close()
+
     SqlServer = db_server()
-    SqlServer.get_mysql_connection("localhost", "db_finance", "root", "root")
+    SqlServer.get_mysql_connection(jsonData["server_db"][0]['ServerName'], jsonData["dbs"][0]['Name'], jsonData["server_db"][0]['User'], jsonData["server_db"][0]['Password'])
     sqlString = "select * from transactionsdetails order by Date desc Limit 1"
     list = SqlServer.get_data_query_list(sqlString)
     if(list == 0):
@@ -326,31 +332,14 @@ def Init(credentailsPath, csvpath, dbs, servers):
 
 
 if __name__ == "__main__":
-
     csvPath = "Transacciones del mes.csv"
-    dbs = [
-        {
-            "Name": "db_finance"
-        }
-        # {
-        #     "Name": "db_finance_dev"
-        # }
-    ]
 
-    server_db = [
-        {
-            "ServerName": "",
-            "User": "",
-            "Password": ""
-        },
-        {
-            "ServerName": "",
-            "User": "",
-            "Password": ""
-        }
-    ]
-
-    os.system('clear')
+    file = open("server_cred.json", 'r')
+    jsonData = json.load(file)
+    jsonData = dict(jsonData)
+    file.close()
+    server_db = jsonData['server_db']
+    dbs = jsonData['dbs']
     Init("cred.txt", csvPath, dbs, server_db)
 
     print("Saving the data....\n\n")

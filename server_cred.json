@@ -1,0 +1,22 @@
+{
+    "dbs" :[
+        {
+            "Name": ""
+        },
+        {
+            "Name": ""
+        }
+    ],
+    "server_db" : [
+        {
+            "ServerName": "",
+            "User": "",
+            "Password": ""
+        },
+        {
+            "ServerName": "",
+            "User": "",
+            "Password": ""
+        }
+    ]
+}
